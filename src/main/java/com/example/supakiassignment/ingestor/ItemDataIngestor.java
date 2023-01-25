@@ -55,7 +55,7 @@ public class ItemDataIngestor {
                             .listingId(item.getId())
                             .name(item.getName())
                             .price(item.getPrice().floatValue())
-                            .status(ItemStatus.AVAILABLE)
+                            .status("AVAILABLE")
                             .build();
 
                     batchOfItems.add(it);

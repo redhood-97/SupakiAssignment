@@ -2,6 +2,7 @@ package com.example.supakiassignment.service.impl;
 
 import com.example.supakiassignment.dto.PageResponse;
 import com.example.supakiassignment.entity.Item;
+import com.example.supakiassignment.enums.ItemStatus;
 import com.example.supakiassignment.repository.StoreRepository;
 import com.example.supakiassignment.service.StoreService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,7 @@ public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
 
     public PageResponse<Item> fetchAll(int pageNum, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
-        Page page = storeRepository.findAll(pageable);
+        Page<Item> page = storeRepository.findAllByStatusNot("SOLD", PageRequest.of(pageNum, pageSize));
         log.info("Total elements in the current page = {}", page.getTotalElements());
         PageResponse<Item> res = PageResponse.<Item>builder()
                 .items(page.getContent())

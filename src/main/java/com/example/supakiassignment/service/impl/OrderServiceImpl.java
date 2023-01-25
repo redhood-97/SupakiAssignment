@@ -75,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
             Float newBalance = wallet.get(0).getBalance() - item.get().getPrice();
             wallet.get(0).setBalance(newBalance);
             walletRepository.save(wallet.get(0));
-            item.get().setStatus(ItemStatus.SOLD);
+            item.get().setStatus("SOLD");
             storeRepository.save(item.get());
 
             return OrderPlaceResultDto.builder()
