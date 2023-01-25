@@ -1,6 +1,7 @@
 package com.example.supakiassignment.service.impl;
 
 import com.example.supakiassignment.dto.OrderPlaceResultDto;
+import com.example.supakiassignment.dto.PageResponse;
 import com.example.supakiassignment.entity.Item;
 import com.example.supakiassignment.entity.Order;
 import com.example.supakiassignment.entity.User;
@@ -14,8 +15,12 @@ import com.example.supakiassignment.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.ast.Or;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +53,8 @@ public class OrderServiceImpl implements OrderService {
                         .build();
 
             List<Wallet> wallet = walletRepository.findWalletByUserId(user.get().getId());
-            // No validation for wallet check as it will be created during user creation
+
+            // No validation for wallet check as it will be created during user creation, plus no apis are there yet to delete yet
             if (wallet.get(0).getBalance() < item.get().getPrice())
                 return OrderPlaceResultDto.builder()
                         .msg("Sorry, balance is insufficient to complete this order. Please recharge to proceed.")
@@ -59,6 +65,8 @@ public class OrderServiceImpl implements OrderService {
                     .itemId(itemId)
                     .userId(userId)
                     .cost(item.get().getPrice())
+                    .name(item.get().getName())
+                    .orderedAt(LocalDate.now())
                     .build();
 
             Order purchase = orderRepository.save(order);
@@ -81,7 +89,19 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    public List<Order> findOrdersOfAUser(String userId) {
-        return new ArrayList<Order>();
+    public PageResponse<Order> findAllOrders(String userId, int pageNum, int pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page page = orderRepository.findByUserId(userId, PageRequest.of(pageNum, pageSize));
+        log.info("Total elements in the current page = {}", page.getTotalElements());
+
+        PageResponse<Order> res = PageResponse.<Item>builder()
+                .items(page.getContent())
+                .currentPage(pageNum)
+                .total(page.getContent().size())
+                .totalPages(page.getTotalPages())
+                .build();
+
+        return res;
     }
 }
