@@ -13,19 +13,16 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WalletServiceImpl  {
+public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
 
     public Wallet getWalletBalance(String userId) {
         try {
             List<Wallet> walletRes = walletRepository.findWalletByUserId(userId);
-            if(walletRes.isEmpty()) {
-                return null;
-            }
             return walletRes.get(0);
         }catch(Exception e) {
             log.error("Error encountered while fetching wallet details for user id = {}", userId);
+            return null;
         }
-        return null;
     }
 }
