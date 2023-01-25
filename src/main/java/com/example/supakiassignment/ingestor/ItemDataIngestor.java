@@ -33,35 +33,43 @@ public class ItemDataIngestor {
 
     @PostConstruct
     public void ingest() {
+        List<Item> remainingBatches = new ArrayList<>();
         try {
             log.info("Beginning the ingestion of data...");
             List<IngestorDataDto> responseObjects = exchangeAsList(ingestorConfigProperties.getUrl(),
                     new ParameterizedTypeReference<>() {
                     });
-            //responseObjects.forEach(System.out::println);
+            /**
+             *  Currently, insertion happens in batches of 10 which improves the performance
+             */
             final int[] batchSizeTracker = {0};
             List<Item> batchOfItems = new ArrayList<>();
+            List<String> idBatch = new ArrayList<>();
             responseObjects.forEach(item -> {
                 List<Item> existingItems = storeRepository.findByListingId(item.getId());
                 log.info("The size of list returned for id = {} is {}", item.getId(), existingItems.size());
-                if (existingItems == null || existingItems.size() == 0) {
-                    //batchSizeTracker[0] = batchSizeTracker[0] +1;
-                    Item store = Item.builder()
+                if (existingItems.size() == 0 && !idBatch.contains(item.getId())) {
+                    batchSizeTracker[0] = batchSizeTracker[0] +1;
+
+                    Item it = Item.builder()
                             .id(item.getId())
                             .listingId(item.getId())
                             .name(item.getName())
                             .price(item.getPrice().floatValue())
                             .status(ItemStatus.AVAILABLE)
                             .build();
-                    //batchOfStores.add(store);
-                    /*
-                    if(batchSizeTracker[0] % 10 == 0 || batchSizeTracker[0] == responseObjects.size()) {
-                        storeRepository.saveAll(batchOfStores);
-                        batchOfStores.clear();
-                    }
 
-                     */
-                    storeRepository.save(store);
+                    batchOfItems.add(it);
+                    remainingBatches.add(it);
+                    idBatch.add(item.getId());
+
+                    if(batchSizeTracker[0] % 10 == 0) {
+                        log.info("Batch insertion done ", batchSizeTracker[0], " ",responseObjects.size());
+                        storeRepository.saveAll(batchOfItems);
+                        batchOfItems.clear();
+                        remainingBatches.clear();
+                        idBatch.add(item.getId());
+                    }
                 } else {
                     log.info("This item is already present in the store");
                 }
@@ -69,5 +77,10 @@ public class ItemDataIngestor {
         } catch (Exception e) {
             log.error("Encountered some error while loading the database", e);
         }
+
+        // edge-case -> saving all the remaining batches in the last loop of lambda
+        log.info("Storing the remaining batches in the last loop");
+        storeRepository.saveAll(remainingBatches);
+
     }
 }

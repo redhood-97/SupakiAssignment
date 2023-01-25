@@ -15,8 +15,6 @@ spring:
       order_inserts: true
       ddl-auto: update
       generate_statistics: true
-      jdbc:
-        batch_size: 4
 
 ingestor:
   url: https://assignment.free.beeceptor.com/listings
