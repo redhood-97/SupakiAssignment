@@ -30,6 +30,6 @@ public class Item {
 
     @NonNull
     @Column(name = "status")
-    private ItemStatus status;
+    private String status;
 
 }
