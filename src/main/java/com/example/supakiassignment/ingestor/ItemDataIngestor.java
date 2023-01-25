@@ -47,7 +47,6 @@ public class ItemDataIngestor {
             List<String> idBatch = new ArrayList<>();
             responseObjects.forEach(item -> {
                 List<Item> existingItems = storeRepository.findByListingId(item.getId());
-                log.info("The size of list returned for id = {} is {}", item.getId(), existingItems.size());
                 if (existingItems.size() == 0 && !idBatch.contains(item.getId())) {
                     batchSizeTracker[0] = batchSizeTracker[0] +1;
 
