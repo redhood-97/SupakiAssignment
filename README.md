@@ -69,7 +69,7 @@ URL format: /wallet?userId=53b2465b-daf1-44ae-86a4-1c4af0d7f647
 
 ## Assumptions and considerations
 **1.** Here 'order' is separate which shows the list of items purchased by the user. <br>
-**2.** Here 'wallet' is used to show the balance of a particular user.
+**2.** Here 'wallet' is used to show the balance of a particular user. <br>
 **3.** The same item (with the same external id) cannot be loaded again in the database.
 
 
